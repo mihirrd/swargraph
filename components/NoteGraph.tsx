@@ -161,6 +161,25 @@ export default function NoteGraph({ sequences }: Props) {
           ))}
         </LineChart>
       </ResponsiveContainer>
+
+      {/* Integer sequence output */}
+      <div className="mt-4 space-y-2">
+        {sequences.map((seq, si) => (
+          <div key={si} className="flex items-start gap-2">
+            {!isSingle && (
+              <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: seq.color }} />
+            )}
+            <div className="flex-1 min-w-0">
+              {!isSingle && (
+                <span className="text-xs text-slate-500 font-mono mr-2">{seq.label}:</span>
+              )}
+              <span className="font-mono text-sm break-all" style={{ color: seq.color }}>
+                [{seq.notes.map((n) => n.value).join(', ')}]
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

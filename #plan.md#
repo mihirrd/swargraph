@@ -1,0 +1,31 @@
+I want to create a graphing and arithmatic calculator for musical notes.
+Treat These notes as following:
+S as 0
+r as 1
+R as 2 
+g as 3 
+G as 4 
+m as 5
+M as 6 
+P as 7 
+d as 8 
+D as 9 
+n as 10
+N as 11
+
+This is middle octale
+
+After this 
+S' is 12
+r' is 13 
+and so on 
+
+This is higher octave
+
+Similarly lower octave would be 'S, 'r (' trailing behind the note.)
+
+I want to be able to plot graphs of these notes. for example "an Aroha" of a raag is asceding order of the notes present in it. If I type Sa Re Ga Pa Dha Sa'. The tool should plot a graph of these notes. Y axis would be numbers associated with the notes and x axis would be the notes itself
+
+--
+
+Build this in next js
