@@ -1,0 +1,10 @@
+# Next.js
+.next/
+out/
+node_modules/
+
+# Emacs lock files
+.#*
+
+# OS
+.DS_Store
