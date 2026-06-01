@@ -98,6 +98,14 @@ export function valueToNoteName(value: number): string {
   return baseName;
 }
 
+/** Shift every note in a sequence by a fixed number of semitones, preserving all intervals. */
+export function applyMoorchhana(notes: ParsedNote[], semitoneShift: number): ParsedNote[] {
+  return notes.map((note) => {
+    const newValue = note.value + semitoneShift;
+    return { name: valueToNoteName(newValue), value: newValue };
+  });
+}
+
 export interface CalcResult {
   value: number;
   noteName: string;

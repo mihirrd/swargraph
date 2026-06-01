@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { parseNoteSequence, ParsedNote } from '@/lib/notes';
+import { parseNoteSequence, ParsedNote, applyMoorchhana, valueToNoteName } from '@/lib/notes';
 import NoteGraph from '@/components/NoteGraph';
 import NoteCalculator from '@/components/NoteCalculator';
 
@@ -122,6 +122,11 @@ export default function Home() {
   ]);
   const [saved, setSaved] = useState<SavedEntry[]>([]);
 
+  const [moorInput, setMoorInput] = useState('');
+  const [moorOffset, setMoorOffset] = useState('');
+  const [moorResult, setMoorResult] = useState<ParsedNote[]>([]);
+  const [moorError, setMoorError] = useState('');
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem(LS_KEY);
@@ -194,6 +199,32 @@ export default function Home() {
       if (next[i].notes.length > 0) upsertSaved(next[i].input.trim());
     }
   };
+
+  const handleMoorchhana = () => {
+    const parsed = parseNoteSequence(moorInput);
+    if (parsed.length === 0) {
+      setMoorError('No valid notes found.');
+      setMoorResult([]);
+      return;
+    }
+    const shift = parseInt(moorOffset, 10);
+    if (isNaN(shift)) {
+      setMoorError('Enter a valid integer offset.');
+      setMoorResult([]);
+      return;
+    }
+    setMoorError('');
+    setMoorResult(applyMoorchhana(parsed, shift));
+  };
+
+  const loadMoorchhanaIntoGraph = () => {
+    if (moorResult.length === 0) return;
+    const text = moorResult.map((n) => n.name).join(' ');
+    loadSaved(text);
+  };
+
+  const offsetInt = parseInt(moorOffset, 10);
+  const offsetHint = !isNaN(offsetInt) ? valueToNoteName(offsetInt) : null;
 
   const graphSequences = seqs
     .map((s, i) => ({ notes: s.notes, label: `Seq ${i + 1}`, color: SEQ_COLORS[i] }))
@@ -332,6 +363,59 @@ export default function Home() {
         <div className="mt-4">
           <NoteGraph sequences={graphSequences} />
         </div>
+      </section>
+
+      {/* Moorchhana Section */}
+      <section className="mb-6 p-4 bg-slate-900 border border-slate-800 rounded-2xl">
+        <h2 className="text-base font-semibold text-white mb-1">Moorchhana</h2>
+        <p className="text-slate-500 text-xs mb-3">
+          Shift every note by a fixed number of semitones, preserving all intervals.
+        </p>
+
+        <div className="space-y-2 mb-3">
+          <input
+            value={moorInput}
+            onChange={(e) => { setMoorInput(e.target.value); setMoorError(''); setMoorResult([]); }}
+            onKeyDown={(e) => e.key === 'Enter' && handleMoorchhana()}
+            placeholder="Note sequence — e.g. S R G M"
+            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white font-mono text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+          />
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              value={moorOffset}
+              onChange={(e) => { setMoorOffset(e.target.value); setMoorError(''); setMoorResult([]); }}
+              onKeyDown={(e) => e.key === 'Enter' && handleMoorchhana()}
+              placeholder="Semitone offset"
+              className="w-40 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white font-mono text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+            />
+            {offsetHint && (
+              <span className="text-violet-400 font-mono text-sm">= {offsetHint}</span>
+            )}
+            <button
+              onClick={handleMoorchhana}
+              className="ml-auto bg-violet-600 hover:bg-violet-500 active:bg-violet-700 text-white px-5 py-1.5 rounded-lg font-medium text-sm transition-colors"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+
+        {moorError && <p className="text-red-400 text-sm mb-2">{moorError}</p>}
+
+        {moorResult.length > 0 && (
+          <div className="mt-3 p-3 bg-slate-800 rounded-xl flex items-center gap-3">
+            <span className="text-white font-mono text-sm flex-1">
+              {moorResult.map((n) => n.name).join(' ')}
+            </span>
+            <button
+              onClick={loadMoorchhanaIntoGraph}
+              className="text-xs text-violet-400 hover:text-violet-300 border border-violet-800 hover:border-violet-600 px-3 py-1 rounded-lg transition-colors shrink-0"
+            >
+              Load into graph
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Calculator Section — hidden, re-enable when ready */}
